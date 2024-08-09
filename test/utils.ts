@@ -13,7 +13,7 @@ const impersonate = async (contract: any, account: any) =>
 
 const paramsDefault = {
   resourceId: "7f0e683bd119688847070f0a4476d078b95399a2843ca1c549cdcdbafee0792f",
-  price: BigInt(2),
+  price: BigInt(25),
   expirationDuration: 3,
 };
 
