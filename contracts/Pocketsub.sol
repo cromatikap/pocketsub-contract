@@ -25,6 +25,22 @@ contract Pocketsub is ERC4908 {
         setAccess(resourceId, price, expirationDuration);
     }
 
+    function deleteSubscription(string calldata resourceId) public {
+        Subscription[] storage subscriptions = shopSubscriptions[msg.sender];
+        uint256 length = subscriptions.length;
+
+        for (uint256 i = 0; i < length; i++) {
+            if (keccak256(abi.encodePacked(subscriptions[i].resourceId)) 
+                    == keccak256(abi.encodePacked(resourceId))) {
+                subscriptions[i] = subscriptions[length - 1];
+                subscriptions.pop();
+                break;
+            }
+        }
+
+        delAccess(resourceId);
+    }
+
     struct SubscriptionDetails {
         string resourceId;
         string imageURL;
@@ -37,8 +53,17 @@ contract Pocketsub is ERC4908 {
         SubscriptionDetails[] memory subs = new SubscriptionDetails[](length);
 
         for (uint256 i = 0; i < length; i++) {
-            (uint256 price, uint32 expirationDuration) = this.getAccessControl(shop, shopSubscriptions[shop][i].resourceId);
-            subs[i] = SubscriptionDetails(shopSubscriptions[shop][i].resourceId, shopSubscriptions[shop][i].imageURL, price, expirationDuration);
+            (uint256 price, uint32 expirationDuration) = this.getAccessControl(
+                shop, 
+                shopSubscriptions[shop][i].resourceId
+            );
+
+            subs[i] = SubscriptionDetails(
+                shopSubscriptions[shop][i].resourceId,
+                shopSubscriptions[shop][i].imageURL,
+                price,
+                expirationDuration
+            );
         }
 
         return subs;

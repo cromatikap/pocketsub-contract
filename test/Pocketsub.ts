@@ -22,7 +22,7 @@ describe("Pocketsub", function () {
     /* Arrange */
 
     const { pocketsub, wallet } = await loadFixture(deployPocketsubFixture);
-    const { resourceId, price, expirationDuration } = paramsDefault;
+    const { resourceId, price, expirationDuration } = paramsDefault[0];
 
     const expectedHash = keccak256(encodePacked(
       ['address', 'string'],
@@ -89,4 +89,61 @@ describe("Pocketsub", function () {
     expect(result2[0].imageURL).to.equal("https://othershop");
   });
 
+  describe("Should delete shop subscription", function () {
+    it("existAccess() should return true or false accordingly", async function () {
+      /* Arrange */
+
+      const { pocketsub, wallet } = await loadFixture(deployPocketsubFixture);
+      const { resourceId, price, expirationDuration, imageURL } = paramsDefault[0];
+
+      /* Act */
+
+      const dontexist = await pocketsub.read.existAccess([wallet.account.address, resourceId]);
+      await pocketsub.write.setSubscription([resourceId, price, expirationDuration, imageURL]);
+      const exist = await pocketsub.read.existAccess([wallet.account.address, resourceId]);
+      await pocketsub.write.deleteSubscription([resourceId]);
+      const dontexistAgain = await pocketsub.read.existAccess([wallet.account.address, resourceId]);
+      await pocketsub.write.setSubscription([resourceId, price, expirationDuration, imageURL]);
+      const existAgain = await pocketsub.read.existAccess([wallet.account.address, resourceId]);
+      
+      /* Assert */
+
+      expect(dontexist).to.equal(false);
+      expect(exist).to.equal(true);
+      expect(dontexistAgain).to.equal(false);
+      expect(existAgain).to.equal(true);
+    });
+
+    it("The item should be removed from the shop subscriptions", async function () {
+      /* Arrange */
+
+      const { pocketsub, wallet } = await loadFixture(deployPocketsubFixture);
+
+      /* Act */
+
+      await pocketsub.write.setSubscription([paramsDefault[0].resourceId, paramsDefault[0].price, paramsDefault[0].expirationDuration, paramsDefault[0].imageURL]);
+      await pocketsub.write.setSubscription([paramsDefault[1].resourceId, paramsDefault[1].price, paramsDefault[1].expirationDuration, paramsDefault[1].imageURL]);
+      await pocketsub.write.setSubscription([paramsDefault[2].resourceId, paramsDefault[2].price, paramsDefault[2].expirationDuration, paramsDefault[2].imageURL]);
+      const threeSubs = await pocketsub.read.getShopSubscriptions([wallet.account.address]);
+      await pocketsub.write.deleteSubscription([paramsDefault[1].resourceId]);
+      const twoSubs = await pocketsub.read.getShopSubscriptions([wallet.account.address]);
+      
+      /* Assert */
+
+      expect(threeSubs).to.have.length(3);
+      expect(twoSubs).to.have.length(2);
+
+      expect(threeSubs[threeSubs.length - 1].resourceId).to.equal(paramsDefault[2].resourceId);
+      expect(twoSubs[twoSubs.length - 1].resourceId).to.equal(paramsDefault[2].resourceId);
+    });
+  });
+
+  it("Should mint customer subscription NFT", async function () {
+  });
+
+  it("Should display metadata of customer subscription NFT after shop subscription is deleted", async function () {
+  });
+
+  it("Should test if customer has access to resource", async function () {
+  });
 });
