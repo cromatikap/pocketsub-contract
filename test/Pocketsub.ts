@@ -155,6 +155,7 @@ describe("Pocketsub", function () {
       await shop.write.setSubscription([resourceId, price, expirationDuration, imageURL]);
       const dealInfoEmpty = await pocketsub.read.dealInfo([0n]);
       await customer.write.mint([Shop.account.address, resourceId, Customer.account.address], { value: price });
+      await shop.write.deleteSubscription([resourceId]);
       const dealInfo = await pocketsub.read.dealInfo([0n]);
 
       /* Assert */
@@ -166,7 +167,6 @@ describe("Pocketsub", function () {
       expect(dealInfo[0].toLowerCase).to.be.equal(Shop.account.address.toLowerCase);
       expect(dealInfo[1]).to.be.equal(imageURL);
       expect(dealInfo[2]).to.be.equal(price);
-
     });
   });
 
