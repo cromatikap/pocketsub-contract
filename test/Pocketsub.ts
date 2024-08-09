@@ -138,7 +138,36 @@ describe("Pocketsub", function () {
     });
   });
 
-  it("Should mint customer subscription NFT", async function () {
+  describe("Should mint customer subscription NFT", async function () {
+    it("Should add shop address, image url and price to customer subscription NFT data", async function () {
+      /* Arrange */
+
+      const { pocketsub, wallets } = await loadFixture(deployPocketsubFixture);
+      const { resourceId, price, expirationDuration, imageURL } = paramsDefault[0];
+
+      const [Shop, Customer] = wallets;
+
+      let shop = await impersonate(pocketsub, Shop);
+      let customer = await impersonate(pocketsub, Customer);
+
+      /* Act */
+
+      await shop.write.setSubscription([resourceId, price, expirationDuration, imageURL]);
+      const dealInfoEmpty = await pocketsub.read.dealInfo([0n]);
+      await customer.write.mint([Shop.account.address, resourceId, Customer.account.address], { value: price });
+      const dealInfo = await pocketsub.read.dealInfo([0n]);
+
+      /* Assert */
+
+      expect(dealInfoEmpty[0]).to.be.equal('0x0000000000000000000000000000000000000000');
+      expect(dealInfoEmpty[1]).to.be.equal('');
+      expect(dealInfoEmpty[2]).to.be.equal(0n);
+
+      expect(dealInfo[0].toLowerCase).to.be.equal(Shop.account.address.toLowerCase);
+      expect(dealInfo[1]).to.be.equal(imageURL);
+      expect(dealInfo[2]).to.be.equal(price);
+
+    });
   });
 
   it("Should display metadata of customer subscription NFT after shop subscription is deleted", async function () {

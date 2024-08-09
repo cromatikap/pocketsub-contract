@@ -2,8 +2,10 @@ pragma solidity ^0.8.24;
 
 import {ERC4908} from "erc-4908/contracts/ERC4908.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract Pocketsub is ERC4908 {
+
+contract Pocketsub is ERC4908, ReentrancyGuard {
     string DEFAULT_IMAGE_URL = "https://arweave.net/9u0cgTmkSM25PfQpGZ-JzspjOMf4uGFjkvOfKjgQnVY";
 
     struct Subscription {
@@ -11,9 +13,36 @@ contract Pocketsub is ERC4908 {
         string imageURL;
     }
 
+    struct Deal {
+        address shop;
+        string imageURL;
+        uint256 price;
+    }
+
     mapping(address => Subscription[]) public shopSubscriptions;
+    mapping(uint256 => Deal) public dealInfo;
 
     constructor() ERC4908("Pocketsub", "PKS") {}
+
+    function mint(
+        address shop,
+        string calldata resourceId,
+        address to
+    ) public payable override nonReentrant {
+        super.mint(shop, resourceId, to);
+
+        uint256 length = shopSubscriptions[shop].length;
+        string memory imageURL = "";
+        for (uint256 i = 0; i < length; i++) {
+            if (keccak256(abi.encodePacked(shopSubscriptions[shop][i].resourceId)) 
+                    == keccak256(abi.encodePacked(resourceId))) {
+                imageURL = shopSubscriptions[shop][i].imageURL;
+                break;
+            }
+        }
+
+        dealInfo[totalSupply() - 1] = Deal(shop, imageURL, msg.value);
+    }
 
     function setSubscription(
         string calldata resourceId,
@@ -72,13 +101,16 @@ contract Pocketsub is ERC4908 {
     function tokenURI(uint256 id) public view override returns (string memory) {
         string memory jsonPreImage = string.concat(
             string.concat(
-                string.concat('{"name": "Test #', Strings.toString(id)),
-                '","description":"TBD","external_url":"https://TBD","image":"'
+                string.concat('{"name": "', nftData[id].resourceId),
+                    string.concat('","description":"What you are looking at is a NFT subscription.","external_url":"https://pocketsub.io/0x90d87CfCeF0d8058BfDb2862C00B5525556253F2',
+                            string.concat('","image":"', dealInfo[id].imageURL)
+                    )
+                
             ),
             string.concat(DEFAULT_IMAGE_URL)
         );
 
-        string memory jsonPostImage = '","attributes":[{"display_type": "date", "trait_type":"Expiration date","value": 1546360800';
+        string memory jsonPostImage = '","attributes":[{"display_type": "date", "trait_type": "Expiration date","value": 1546360800';
         string memory jsonPostTraits = '}]}';
 
         return string.concat(
