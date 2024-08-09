@@ -102,15 +102,15 @@ contract Pocketsub is ERC4908, ReentrancyGuard {
         string memory jsonPreImage = string.concat(
             string.concat(
                 string.concat('{"name": "', nftData[id].resourceId),
-                    string.concat('","description":"What you are looking at is a NFT subscription.","external_url":"https://pocketsub.io/0x90d87CfCeF0d8058BfDb2862C00B5525556253F2',
-                            string.concat('","image":"', dealInfo[id].imageURL)
-                    )
-                
+                '","description":"What you are looking at is a NFT subscription.","external_url":"https://pocketsub.io/0x90d87CfCeF0d8058BfDb2862C00B5525556253F2","image":"'
             ),
-            string.concat(DEFAULT_IMAGE_URL)
+            dealInfo[id].imageURL
         );
 
-        string memory jsonPostImage = '","attributes":[{"display_type": "date", "trait_type": "Expiration date","value": 1546360800';
+        string memory jsonPostImage = string.concat(
+            '","attributes":[{"display_type": "date", "trait_type": "Expiration date","value": ', 
+            Strings.toString(nftData[id].expirationTime)
+        );
         string memory jsonPostTraits = '}]}';
 
         return string.concat(

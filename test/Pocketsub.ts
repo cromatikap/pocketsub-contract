@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpe
 import { expect } from "chai";
 import hre from "hardhat";
 import { keccak256, encodePacked } from "viem";
-import { impersonate, paramsDefault } from "./utils";
+import { getBlockTimestamp, impersonate, paramsDefault } from "./utils";
 
 describe("Pocketsub", function () {
   async function deployPocketsubFixture() {
@@ -167,6 +167,34 @@ describe("Pocketsub", function () {
       expect(dealInfo[0].toLowerCase).to.be.equal(Shop.account.address.toLowerCase);
       expect(dealInfo[1]).to.be.equal(imageURL);
       expect(dealInfo[2]).to.be.equal(price);
+    });
+
+    it("Should give the right tokenURI", async function () {
+      /* Arrange */
+
+      const { pocketsub, wallets } = await loadFixture(deployPocketsubFixture);
+      const { resourceId, price, expirationDuration, imageURL } = paramsDefault[0];
+
+      const [Shop, Customer] = wallets;
+
+      let shop = await impersonate(pocketsub, Shop);
+      let customer = await impersonate(pocketsub, Customer);
+
+      await shop.write.setSubscription([resourceId, price, expirationDuration, imageURL]);
+
+      /* Act */
+
+      const mintTime = await getBlockTimestamp();
+      await customer.write.mint([Shop.account.address, resourceId, Customer.account.address], { value: price });
+
+      const tokenURI = await pocketsub.read.tokenURI([0n]);
+      const metadata = JSON.parse(tokenURI.slice(27,tokenURI.length));
+
+      /* Assert */
+
+      expect(metadata.name).to.be.equal(resourceId);
+      expect(metadata.image).to.be.equal(imageURL);
+      expect(metadata.attributes[0].value).to.be.equal(mintTime + expirationDuration + 1);
     });
   });
 
