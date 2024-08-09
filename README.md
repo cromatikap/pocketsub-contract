@@ -1,13 +1,31 @@
-# Sample Hardhat Project
+# Pocketsub smart-contract
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+smart-contract for [Pocketsub](https://github.com/cromatikap/pocketsub)
 
-Try running some of the following tasks:
+## Development
 
-```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat ignition deploy ./ignition/modules/Lock.ts
+### Getting started
+
+```sh
+npm install
+```
+
+### Tests & cleaning
+
+```sh
+npm run test # Pass env var REPORT_GAS=false to deactivate gas 
+```
+
+### Deploying the contracts
+
+```sh
+cp .env.example .env
+vim .env # Add the private key you want to use to deploy the contracts
+npx hardhat ignition deploy ./ignition/modules/Pocketsub.ts --network testnet --reset
+```
+
+### Verifying the contracts
+
+```sh
+npx hardhat verify --network testnet <CONTRACT ADDRESS> <CONSTRUCTOR_PARAMETERS>
 ```
