@@ -88,4 +88,5 @@ describe("Pocketsub", function () {
     expect(result2[0].expirationDuration).to.equal(4);
     expect(result2[0].imageURL).to.equal("https://othershop");
   });
+
 });

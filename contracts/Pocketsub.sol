@@ -53,7 +53,7 @@ contract Pocketsub is ERC4908 {
             string.concat(DEFAULT_IMAGE_URL)
         );
 
-        string memory jsonPostImage = '","attributes":[{"trait_type":"Color","value": "TBD"';
+        string memory jsonPostImage = '","attributes":[{"display_type": "date", "trait_type":"Expiration date","value": 1546360800';
         string memory jsonPostTraits = '}]}';
 
         return string.concat(
