@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "prettier": "prettier --write --plugin=prettier-plugin-solidity contracts/**/*.sol",
+    "lint": "solhint contracts/**/*.sol",
     "compile": "hardhat compile",
     "test": "hardhat test"
   },
@@ -11,7 +13,11 @@
   "description": "",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "^3.0.0",
-    "hardhat": "^2.22.8"
+    "hardhat": "^2.22.8",
+    "prettier": "^3.3.3",
+    "prettier-plugin-solidity": "^1.3.1",
+    "solhint-community": "^4.0.0",
+    "solhint-plugin-prettier": "^0.1.0"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
