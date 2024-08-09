@@ -62,8 +62,6 @@ describe("Pocketsub", function () {
     const result1 = await pocketsub.read.getShopSubscriptions([Shop1.account.address]);
     const result2 = await pocketsub.read.getShopSubscriptions([Shop2.account.address]);
 
-    console.log(result2);
-
     /* Assert */
 
     expect(result1).to.have.length(3);
