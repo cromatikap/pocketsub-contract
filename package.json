@@ -21,6 +21,6 @@
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
-    "erc-4908": "^1.0.2"
+    "erc-4908": "^1.0.7"
   }
 }

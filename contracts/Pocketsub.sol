@@ -79,7 +79,7 @@ contract Pocketsub is ERC4908, ReentrancyGuard {
     }
 
     function mint(
-        address shop,
+        address payable shop,
         string calldata resourceId,
         address to
     ) public payable override nonReentrant {
