@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-toolbox-viem/network-helpe
 import { expect } from "chai";
 import hre from "hardhat";
 import { keccak256, encodePacked } from "viem";
-import { getBlockTimestamp, impersonate, paramsDefault } from "./utils";
+import { getBlockTimestamp, impersonate, increaseTime, paramsDefault } from "./utils";
 
 describe("Pocketsub", function () {
   async function deployPocketsubFixture() {
@@ -198,9 +198,32 @@ describe("Pocketsub", function () {
     });
   });
 
-  it("Should display metadata of customer subscription NFT after shop subscription is deleted", async function () {
-  });
-
   it("Should test if customer has access to resource", async function () {
+    /* Arrange */
+
+    const { pocketsub, wallets } = await loadFixture(deployPocketsubFixture);
+    const { resourceId, price, expirationDuration, imageURL } = paramsDefault[0];
+
+    const [Shop, Customer] = wallets;
+
+    let shop = await impersonate(pocketsub, Shop);
+    let customer = await impersonate(pocketsub, Customer);
+
+    await shop.write.setSubscription([resourceId, price, expirationDuration, imageURL]);
+    
+    /* Act */
+
+    const doesntHaveAccess = await pocketsub.read.hasAccess([Shop.account.address, Customer.account.address]);
+    await customer.write.mint([Shop.account.address, resourceId, Customer.account.address], { value: price });
+    const hasAccess = await pocketsub.read.hasAccess([Shop.account.address, Customer.account.address]);
+    await increaseTime(expirationDuration + 1);
+    const accessExpired = await pocketsub.read.hasAccess([Shop.account.address, Customer.account.address]);
+
+    /* Assert */
+
+    expect(doesntHaveAccess).to.be.equal(false);
+    expect(hasAccess).to.be.equal(true);
+    expect(accessExpired).to.be.equal(false);
+
   });
 });

@@ -24,26 +24,6 @@ contract Pocketsub is ERC4908, ReentrancyGuard {
 
     constructor() ERC4908("Pocketsub", "PKS") {}
 
-    function mint(
-        address shop,
-        string calldata resourceId,
-        address to
-    ) public payable override nonReentrant {
-        super.mint(shop, resourceId, to);
-
-        uint256 length = shopSubscriptions[shop].length;
-        string memory imageURL = "";
-        for (uint256 i = 0; i < length; i++) {
-            if (keccak256(abi.encodePacked(shopSubscriptions[shop][i].resourceId)) 
-                    == keccak256(abi.encodePacked(resourceId))) {
-                imageURL = shopSubscriptions[shop][i].imageURL;
-                break;
-            }
-        }
-
-        dealInfo[totalSupply() - 1] = Deal(shop, imageURL, msg.value);
-    }
-
     function setSubscription(
         string calldata resourceId,
         uint256 price,
@@ -96,6 +76,43 @@ contract Pocketsub is ERC4908, ReentrancyGuard {
         }
 
         return subs;
+    }
+
+    function mint(
+        address shop,
+        string calldata resourceId,
+        address to
+    ) public payable override nonReentrant {
+        super.mint(shop, resourceId, to);
+
+        uint256 length = shopSubscriptions[shop].length;
+        string memory imageURL = "";
+        for (uint256 i = 0; i < length; i++) {
+            if (keccak256(abi.encodePacked(shopSubscriptions[shop][i].resourceId)) 
+                    == keccak256(abi.encodePacked(resourceId))) {
+                imageURL = shopSubscriptions[shop][i].imageURL;
+                break;
+            }
+        }
+
+        dealInfo[totalSupply() - 1] = Deal(shop, imageURL, msg.value);
+    }
+
+    function hasAccess(
+        address shop,
+        address customer
+    )
+        public
+        view
+        returns (bool)
+    {
+        for (uint256 i = 0; i < shopSubscriptions[shop].length; i++) {
+            (bool response,,) = this.hasAccess(shop, shopSubscriptions[shop][i].resourceId, customer);
+            if (response) {
+                return (response);
+            }
+        }
+        return false;
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
